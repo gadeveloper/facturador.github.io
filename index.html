@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <title>Platzi - Invoces</title>
+</head>
+<body>
+    <h1>Platzi - Factura</h1>
+    <section class="flex-container">
+      <div class="caja">
+        <form>
+          <label>Product</label>
+          <select name="products" id="products">
+          </select>
+          <label>Count</label>
+          <input type="number" id="countproduct">
+          <button id="btnadd" type="button">Add</button>
+        </form>
+      </div>
+      <div class="caja" id="list-facture">
+        <p>Producto  -  Precio  -  Cantidad  - Total</p>
+      </div>
+    </section>
+    <section class="flex-container-total">
+      <div class="caja" id="price-total">
+        <label>Total : </label> <label id="totalprice"></label>
+      </div>
+    </section>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js";
+        import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore.js";
+
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDgseupEKcTdKEt6agVCoIOMFvgheJgWMo",
+          authDomain: "invoces-platzi.firebaseapp.com",
+          projectId: "invoces-platzi",
+          storageBucket: "invoces-platzi.appspot.com",
+          messagingSenderId: "1091889875495",
+          appId: "1:1091889875495:web:8b3491d3199d9fa9a59c02"
+        };
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let product='';
+        let totalPrecio=0;
+        window.addEventListener('DOMContentLoaded', async(e) => {
+          const querySnapshot = await getDocs(collection(db, "products"));
+          querySnapshot.forEach((doc) => {
+            product+=`<option value=${doc.id}>${doc.data().nombre}</option>`
+          });
+          document.getElementById('products').innerHTML=product;
+        });  
+        
+        async function insertProduct(code,count){
+          let productList='';
+          let sw=0;
+          let precio=0;
+          const querySnapshot = await getDocs(collection(db, "products"));
+          querySnapshot.forEach((doc) => {
+              if(doc.id==code){
+                sw='true';
+                precio=doc.data().valor*count
+                totalPrecio+=precio
+                product=`<p>${doc.data().nombre}  -  ${doc.data().valor}  - ${count}  -   ${precio}</p>`
+              }
+           });
+           if(sw=='true'){
+            document.getElementById('list-facture').innerHTML+=product;
+            document.getElementById("totalprice").innerText=totalPrecio
+           }
+        }
+
+        document.getElementById('btnadd').onclick=function(){
+          const code=document.getElementById('products').value
+          const count=document.getElementById('countproduct').value
+          insertProduct(code,count);
+        }
+    </script>
+
+
+    <script src="./index.js"></script>
+</body>
+</html>
